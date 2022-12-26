@@ -13,42 +13,30 @@ jobs:
     - name: Checkout repo
       uses: actions/checkout@v3
     - name: Cache pip
-      uses: actions/cache@v2
+      uses: actions/cache@v3
       with:
         path: ~/.cache/pip
         key: ${{ runner.os }}-pip-${{ hashFiles('**/requirements.txt') }}
         restore-keys: |
           ${{ runner.os }}-pip-
     - name: Cache PlatformIO
-      uses: actions/cache@v2
+      uses: actions/cache@v3
       with:
         path: ~/.platformio
         key: ${{ runner.os }}-${{ hashFiles('**/lockfiles') }}
     - name: Set up Python
-      uses: actions/setup-python@v2
+      uses: actions/setup-python@v4
     - name: Install PlatformIO
       run: |
         python -m pip install --upgrade pip
         pip install --upgrade platformio
     - name: Run PlatformIO
       run: pio run -e nodemcuv2
-      
-    # - name: esp-idf build
-    #   uses: Fishwaldo/esp-idf-ci-action@v1.1
-    #   with:
-    #     esp_idf_version: v4.4.3
-    #     target: ${{ matrix.targets }}
-    #     path: 'examples/esp_ghota_example'
-    # - name: Rename artifact
-    #   run: |
-    #     ls -lah 
-    #     cp examples/esp_ghota_example/build/esp_ghota_example.bin esp_ghota_example-${{ matrix.targets }}.bin
-    #     cp examples/esp_ghota_example/build/storage.bin storage-${{ matrix.targets }}.bin
-    # - name: Archive Firmware Files
-    #   uses: actions/upload-artifact@v3
-    #   with: 
-    #     name: ${{ matrix.targets }}-firmware
-    #     path: "*-${{ matrix.targets }}.bin"
+    - name: Archive Firmware Files
+      uses: actions/upload-artifact@v3
+      with: 
+        name: esp8266-firmware
+        path: ".pio/build/nodemcuv2/firmware.bin"
         
   release:
     needs: build
