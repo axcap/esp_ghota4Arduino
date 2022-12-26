@@ -25,7 +25,7 @@
 #include <ESP8266httpUpdate.h>
 
 // Insert your WiFi secrets here:
-#include "secrets.h"
+// #include "secrets.h"
 
 #ifndef SECRETS_H_
 #define SECRET_SSID "secret_ssid" // Your network SSID (name)    
