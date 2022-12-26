@@ -47,7 +47,7 @@ jobs:
     - name: Download Firmware Files
       uses: actions/download-artifact@v3
     - name: Release Firmware
-      uses: ncipollo/release-action@v2
+      uses: ncipollo/release-action@v1
       #if: startsWith(github.ref, 'refs/tags/')
       with:
         artifacts: esp8266-firmware.bin
