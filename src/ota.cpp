@@ -45,6 +45,7 @@ void HandleOTA(String releaseUrl, WiFiClientSecure client)
     }
 }
 
+#ifdef DO_NOT_USE_GITHUB_API
 String GetUpdatedFirmwareUrl(String releaseUrl, WiFiClientSecure client)
 {
     String browser_download_url = "";
@@ -81,8 +82,8 @@ String GetUpdatedFirmwareUrl(String releaseUrl, WiFiClientSecure client)
 
     return browser_download_url;
 }
-
-String GetUpdatedFirmwareUrlFromApi(String releaseUrl, WiFiClientSecure client)
+#else
+String GetUpdatedFirmwareUrl(String releaseUrl, WiFiClientSecure client)
 {
     auto browser_download_url = "";
 
@@ -123,6 +124,7 @@ String GetUpdatedFirmwareUrlFromApi(String releaseUrl, WiFiClientSecure client)
 
     return browser_download_url;
 }
+#endif
 
 void update_started()
 {
