@@ -4,7 +4,7 @@
 
 #define CONTENT_LENGTH_HEADER "content-length"
 
-void InitOta();
+void InitOta(String version);
 void HandleOTA(String releaseUrl, WiFiClientSecure client);
 String GetUpdatedFirmwareUrl(String releaseUrl, WiFiClientSecure client);
 

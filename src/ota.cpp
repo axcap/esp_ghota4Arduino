@@ -2,9 +2,15 @@
 #include <ESP8266httpUpdate.h>
 #include <ArduinoJson.h>
 #include "ota.h"
+#include <sstream>
+#include "SemverClass.h"
 
-void InitOta()
+SemverClass _sem_version; 
+
+void InitOta(String version)
 {
+    _sem_version = SemverClass::fromString(version.c_str());
+
     ESPhttpUpdate.setLedPin(LED_BUILTIN, LOW);
 
     // Add optional callback notifiers
@@ -42,6 +48,43 @@ void HandleOTA(String releaseUrl, WiFiClientSecure client)
 
 String GetUpdatedFirmwareUrl(String releaseUrl, WiFiClientSecure client)
 {
+    String browser_download_url = "";
+
+    HTTPClient https;
+    const char *headerKeys[] = { "location" };
+    https.collectHeaders(headerKeys, sizeof(headerKeys)/sizeof(headerKeys)[0]);
+    https.setFollowRedirects(HTTPC_DISABLE_FOLLOW_REDIRECTS);
+    if (https.begin(client, releaseUrl))
+    {
+        int httpCode = https.GET();
+        if (httpCode != HTTP_CODE_FOUND)
+        {
+            Serial.println("[HTTPS] GET... failed, No redirect");
+        }
+    
+        auto location = https.header("location");
+        auto last_index = location.lastIndexOf('/');
+        auto semver = location.substring(last_index + 1);
+
+        auto _new_version = SemverClass::fromString(semver);
+        if(_new_version > _sem_version){
+            auto new_location = String(location + "/firmware.bin");
+            browser_download_url = new_location;
+            browser_download_url.replace("tag", "download");
+        }
+
+        https.end();
+    }
+    else
+    {
+        Serial.printf("[HTTPS] Unable to connect\n");
+    }
+
+    return browser_download_url;
+}
+
+String GetUpdatedFirmwareUrlFromApi(String releaseUrl, WiFiClientSecure client)
+{
     auto browser_download_url = "";
 
     HTTPClient https;
@@ -65,7 +108,11 @@ String GetUpdatedFirmwareUrl(String releaseUrl, WiFiClientSecure client)
 
             DynamicJsonDocument doc(content_length);
             deserializeJson(doc, https.getStream());
-            browser_download_url = doc["assets"][0]["browser_download_url"];
+            auto _new_version = SemverClass::fromString(doc["name"]);
+
+            if(_new_version > _sem_version){
+                browser_download_url = doc["assets"][0]["browser_download_url"];
+            }
         }
 
         https.end();

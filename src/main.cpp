@@ -19,58 +19,47 @@
   based on Juraj Andrassy sample sketch 'OTASketchDownload'
 */
 
-#include <ESP8266WiFiMulti.h>
-#include "LittleFS.h"
+#include <ESP8266WiFi.h>
+#include <WiFiManager.h>
 #include "ota.h"
 
-#define RELESE_URL "https://api.github.com/repos/axcap/esp_ghota4Arduino/releases/latest"
+#define RELESE_URL "https://github.com/axcap/esp_ghota4Arduino/releases/latest"
+// #define RELESE_URL "https://api.github.com/repos/axcap/esp_ghota4Arduino/releases/latest" //use GetUpdatedFirmwareUrlFromApi to parse
 #define CONNECT_TIMEOUT_MS 10000
 auto hostname = "ESP8266 OTA";
 
-ESP8266WiFiMulti wifiMulti;
 WiFiClientSecure client;
+WiFiManager wifiManager;
 
 void setup()
 {
   Serial.begin(115200);
   while (!Serial)
     ;
-  Serial.println("Welcome");
-
-  if(!LittleFS.begin()){
-    Serial.println("An Error has occurred while mounting LittleFS");
-    return;
-  }
-
-  File file = LittleFS.open("/wifi_config.txt", "a+");
-  if(!file){
-    Serial.println("Failed to open file for reading");
-    return;
-  }
-
-  Serial.println("File Content:");
-  while(file.available()){
-    auto str = file.readString(); //.split("\n")
-    auto ssid = str.substring(0, str.indexOf(";"));
-    auto password = str.substring(str.indexOf(";")+1, str.length()-1);
-    wifiMulti.addAP(ssid.c_str(), password.c_str());
-    Serial.println();
-  }
-  file.close();
 
   Serial.println("Initialize WiFi");
+  // wifiManager.resetSettings();
+  WiFi.mode(WIFI_STA);
   WiFi.hostname(hostname);
-  auto status = wifiMulti.run();
-  if(status != WL_CONNECTED) {
-    Serial.println("WiFi not connected! " + String(status));
+  WiFi.begin();
+
+  Serial.print("Connecting");
+  for (int i=0; WiFi.status() != WL_CONNECTED; i++)
+  {
     delay(1000);
+    Serial.print(".");
+
+    if(i > 5){
+      Serial.println("Fallback AP created");
+      wifiManager.autoConnect("AP-NAME");
+    }
   }
 
   Serial.println("WiFi connected");
   Serial.println("IP address: ");
   Serial.println(WiFi.localIP());
 
-  InitOta();
+  InitOta("v0.0.2");
 }
 
 void loop()
