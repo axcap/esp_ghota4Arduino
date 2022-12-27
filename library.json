@@ -1,6 +1,6 @@
 {
     "name": "esp_ghota4Arduino",
-    "version": "0.0.5",
+    "version": "0.0.7",
     "description": "Arduino OTA updater that uses Github releases as source",
     "keywords": "arduino, esp, ota",
     "repository":
