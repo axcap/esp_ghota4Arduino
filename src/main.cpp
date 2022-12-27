@@ -19,99 +19,63 @@
   based on Juraj Andrassy sample sketch 'OTASketchDownload'
 */
 
-#include <ESP8266WiFi.h>
-#include <ArduinoOTA.h> // only for InternalStorage
-#include <ArduinoHttpClient.h>
-#include <ESP8266httpUpdate.h>
+#include <ESP8266WiFiMulti.h>
+#include "LittleFS.h"
+#include "ota.h"
 
-// Insert your WiFi secrets here:
-// #include "secrets.h"
+#define RELESE_URL "https://api.github.com/repos/axcap/esp_ghota4Arduino/releases/latest"
+#define CONNECT_TIMEOUT_MS 10000
+auto hostname = "ESP8266 OTA";
 
-#ifndef SECRETS_H_
-#define SECRET_SSID "secret_ssid" // Your network SSID (name)    
-#define SECRET_PASS "secret_password" // Your network password
-#define FIRMWARE_URL "secret_url/update-v%d.bin"
-#endif
+ESP8266WiFiMulti wifiMulti;
+WiFiClientSecure client;
 
-const short VERSION = 1;
-WiFiClient client;
-
-void update_started() {
-  Serial.println("CALLBACK:  HTTP update process started");
-}
-
-void update_finished() {
-  Serial.println("CALLBACK:  HTTP update process finished");
-}
-
-void update_progress(int cur, int total) {
-  Serial.printf("CALLBACK:  HTTP update process at %d of %d bytes...\n", cur, total);
-}
-
-void update_error(int err) {
-  Serial.printf("CALLBACK:  HTTP update fatal error code %d\n", err);
-}
-
-void setup() {
+void setup()
+{
   Serial.begin(115200);
-  while (!Serial);
+  while (!Serial)
+    ;
+  Serial.println("Welcome");
 
-  Serial.print("Sketch version ");
-  Serial.println(VERSION);
+  if(!LittleFS.begin()){
+    Serial.println("An Error has occurred while mounting LittleFS");
+    return;
+  }
+
+  File file = LittleFS.open("/wifi_config.txt", "a+");
+  if(!file){
+    Serial.println("Failed to open file for reading");
+    return;
+  }
+
+  Serial.println("File Content:");
+  while(file.available()){
+    auto str = file.readString(); //.split("\n")
+    auto ssid = str.substring(0, str.indexOf(";"));
+    auto password = str.substring(str.indexOf(";")+1, str.length()-1);
+    wifiMulti.addAP(ssid.c_str(), password.c_str());
+    Serial.println();
+  }
+  file.close();
 
   Serial.println("Initialize WiFi");
-  WiFi.mode(WIFI_STA);
-  //Get Current Hostname
-  Serial.printf("Default hostname: %s\n", WiFi.hostname().c_str());
-
-  String newHostname = "ESP8266 OTA";
-  WiFi.hostname(newHostname.c_str());
-
-  //Get Current Hostname
-  Serial.printf("New hostname: %s\n", WiFi.hostname().c_str());
-
-  WiFi.begin(SECRET_SSID, SECRET_PASS);
-  while (WiFi.status() != WL_CONNECTED)
-  {
-    delay(100);
-    Serial.print(".");
+  WiFi.hostname(hostname);
+  auto status = wifiMulti.run();
+  if(status != WL_CONNECTED) {
+    Serial.println("WiFi not connected! " + String(status));
+    delay(1000);
   }
-  
+
   Serial.println("WiFi connected");
   Serial.println("IP address: ");
   Serial.println(WiFi.localIP());
 
-  ESPhttpUpdate.setLedPin(LED_BUILTIN, LOW);
-
-  // Add optional callback notifiers
-  ESPhttpUpdate.onStart(update_started);
-  ESPhttpUpdate.onEnd(update_finished);
-  ESPhttpUpdate.onProgress(update_progress);
-  ESPhttpUpdate.onError(update_error);
+  InitOta();
 }
 
-void loop() {
-  // check for updates
-
-  String PATH = String(FIRMWARE_URL);  // Set your correct hostname
-
-  PATH.replace("%d", String(VERSION + 1));
-  Serial.print("Fetching from: ");
-  Serial.println(PATH);
-
-  auto ret = ESPhttpUpdate.update(client, PATH);
-
-  switch (ret) {
-    case HTTP_UPDATE_FAILED:
-      Serial.printf("HTTP_UPDATE_FAILD Error (%d): %s\n", ESPhttpUpdate.getLastError(), ESPhttpUpdate.getLastErrorString().c_str());
-      break;
-    case HTTP_UPDATE_NO_UPDATES:
-      Serial.println("HTTP_UPDATE_NO_UPDATES");
-      break;
-    case HTTP_UPDATE_OK:
-      Serial.println("HTTP_UPDATE_OK");
-      break;
-  }
+void loop()
+{
+  HandleOTA(RELESE_URL, client);
 
   delay(60000);
 }
