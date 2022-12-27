@@ -34,13 +34,8 @@ semver_t from_string(string version){
 
 string render_to_string(semver_t* sem){
     char *str = (char*)calloc(255, sizeof(char));
-    Serial.printf("Empty: %s\n", str);
     semver_render(sem, (char*)str);
-    Serial.printf("Rendered: %s\n", str);
     auto value = string((char*)str);
-    Serial.printf("value: %s\n", value.c_str());
     free(str);
-    Serial.printf("After free1: %s\n", str);
-    Serial.printf("After free2: %s\n", value.c_str());
     return value.c_str();
 }
