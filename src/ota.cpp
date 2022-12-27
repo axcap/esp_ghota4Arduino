@@ -2,7 +2,6 @@
 #include <ESP8266httpUpdate.h>
 #include <ArduinoJson.h>
 #include "ota.h"
-#include <sstream>
 #include "semver_extensions.h"
 
 semver_t current_version;

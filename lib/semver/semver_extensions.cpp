@@ -8,7 +8,7 @@
 using namespace std;
 
 semver_t from_string(string version){
-    auto numbers = split_string(version, '.');
+    auto numbers = split(version, '.');
     auto major = std::atoi(numbers.at(0).c_str());
     auto minor = std::atoi(numbers.at(1).c_str());
     int patch;
