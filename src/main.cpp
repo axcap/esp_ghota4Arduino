@@ -59,7 +59,7 @@ void setup()
   Serial.println("IP address: ");
   Serial.println(WiFi.localIP());
 
-  InitOta("v0.0.4");
+  InitOta("v0.0.4-rc-lw");
 }
 
 void loop()
