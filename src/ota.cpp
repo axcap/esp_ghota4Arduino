@@ -1,8 +1,8 @@
 #include <ESP8266WiFi.h>
 #include <ESP8266httpUpdate.h>
 #include <ArduinoJson.h>
-#include "ota.h"
 #include "semver_extensions.h"
+#include "ota.h"
 
 semver_t current_version;
 

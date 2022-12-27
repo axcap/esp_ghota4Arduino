@@ -1,8 +1,10 @@
 
-#include "semver.h"
+#include <Arduino.h>
+
 #include <sstream>
 #include <vector>
-#include <Arduino.h>
+
+#include "semver.h"
 #include "string_utils.h"
 
 using namespace std;

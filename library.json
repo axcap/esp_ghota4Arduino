@@ -1,0 +1,28 @@
+{
+    "name": "esp_ghota4Arduino",
+    "version": "0.0.5",
+    "description": "Arduino OTA updater that uses Github releases as source",
+    "keywords": "arduino, esp, ota",
+    "repository":
+    {
+      "type": "git",
+      "url": "https://github.com/axcap/esp_ghota4Arduino.git"
+    },
+    "authors":
+    [
+      {
+        "name": "Akhsarbek Gozoev",
+        "url": "https://github.com/axcap"
+      }
+    ],
+    "license": "MIT",
+    "homepage": "https://github.com/axcap/esp_ghota4Arduino",
+    "dependencies": {
+        "arduino-libraries/ArduinoHttpClient": "^0.4.0",
+        "jandrassy/ArduinoOTA": "^1.0.9",
+        "bblanchon/ArduinoJson": "^6.20.0",
+        "tzapu/WiFiManager": "^0.16.0"
+    },
+    "frameworks": ["arduino"],
+    "platforms": ["espressif8266"]
+  }
