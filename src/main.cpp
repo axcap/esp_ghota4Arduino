@@ -38,8 +38,8 @@ void setup()
     ;
 
   Serial.println("Initialize WiFi");
-  // wifiManager.resetSettings();
   WiFi.mode(WIFI_STA);
+  // wifiManager.resetSettings();
   WiFi.hostname(hostname);
   WiFi.begin();
 
@@ -59,7 +59,7 @@ void setup()
   Serial.println("IP address: ");
   Serial.println(WiFi.localIP());
 
-  InitOta("v0.0.4-rc-lw");
+  InitOta("0.0.4-rc.1");
 }
 
 void loop()

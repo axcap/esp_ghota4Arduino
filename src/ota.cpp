@@ -3,13 +3,13 @@
 #include <ArduinoJson.h>
 #include "ota.h"
 #include <sstream>
-#include "SemverClass.h"
+#include "semver_extensions.h"
 
-SemverClass _sem_version; 
+semver_t current_version;
 
 void InitOta(String version)
 {
-    _sem_version = SemverClass::fromString(version.c_str());
+    current_version = from_string(version.c_str());
 
     ESPhttpUpdate.setLedPin(LED_BUILTIN, LOW);
 
@@ -64,10 +64,10 @@ String GetUpdatedFirmwareUrl(String releaseUrl, WiFiClientSecure client)
     
         auto location = https.header("location");
         auto last_index = location.lastIndexOf('/');
-        auto semver = location.substring(last_index + 1);
+        auto semver_str = location.substring(last_index + 1);
 
-        auto _new_version = SemverClass::fromString(semver);
-        if(_new_version > _sem_version){
+        auto _new_version = from_string(semver_str.c_str());
+        if(_new_version > current_version){
             auto new_location = String(location + "/firmware.bin");
             browser_download_url = new_location;
             browser_download_url.replace("tag", "download");
@@ -108,9 +108,9 @@ String GetUpdatedFirmwareUrlFromApi(String releaseUrl, WiFiClientSecure client)
 
             DynamicJsonDocument doc(content_length);
             deserializeJson(doc, https.getStream());
-            auto _new_version = SemverClass::fromString(doc["name"]);
+            auto _new_version = from_string(doc["name"]);
 
-            if(_new_version > _sem_version){
+            if(_new_version > current_version){
                 browser_download_url = doc["assets"][0]["browser_download_url"];
             }
         }
